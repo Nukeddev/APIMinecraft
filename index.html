@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Minecraft Explorer</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="header-bg"></div>
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">⛏️</span>
+        <div>
+          <h1>Minecraft Explorer</h1>
+          <p class="logo-sub">BlocksItems API v1</p>
+        </div>
+      </div>
+      <nav class="tab-nav">
+        <button class="tab-btn active" data-tab="items">🎒 Items</button>
+        <button class="tab-btn" data-tab="blocks">🧱 Bloques</button>
+        <button class="tab-btn" data-tab="recipes">📜 Recetas</button>
+      </nav>
+    </div>
+  </header>
+
+  <div class="hero-strip" aria-hidden="true">
+    <span>⛏</span><span>🪓</span><span>🗡️</span><span>🏹</span>
+    <span>💎</span><span>🥩</span><span>🌿</span><span>🔥</span>
+    <span>⛏</span><span>🪓</span><span>🗡️</span><span>🏹</span>
+    <span>💎</span><span>🥩</span><span>🌿</span><span>🔥</span>
+  </div>
+
+  <main class="main">
+
+    <div class="stats-bar">
+      <div class="stat-chip"><span class="stat-n" id="statTotal">—</span><span class="stat-l">Total</span></div>
+      <div class="stat-chip"><span class="stat-n" id="statShowing">—</span><span class="stat-l">En página</span></div>
+      <div class="stat-chip"><span class="stat-n" id="statPages">—</span><span class="stat-l">Páginas</span></div>
+      <div class="stat-chip"><span class="stat-n" id="statPage">—</span><span class="stat-l">Página actual</span></div>
+    </div>
+
+    <!-- ITEMS FILTERS -->
+    <div class="filters-panel" id="filters-items">
+      <div class="filters-row">
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="items-search" placeholder="Buscar item..." autocomplete="off"/>
+        </div>
+        <input type="text" class="filter-input" id="items-namespace" placeholder="Namespace (ej: minecraft)"/>
+        <input type="text" class="filter-input" id="items-mod_id" placeholder="Mod ID (ej: create)"/>
+        <select id="items-rarity">
+          <option value="">Rareza: todas</option>
+          <option value="common">Common</option>
+          <option value="uncommon">Uncommon</option>
+          <option value="rare">Rare</option>
+          <option value="epic">Epic</option>
+        </select>
+        <input type="text" class="filter-input" id="items-tag" placeholder="Tag (ej: minecraft:tools)"/>
+        <div class="view-toggle">
+          <button id="btnGrid" class="view-btn active" title="Cuadrícula">⊞</button>
+          <button id="btnList" class="view-btn" title="Lista">☰</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- BLOCKS FILTERS -->
+    <div class="filters-panel" id="filters-blocks" style="display:none">
+      <div class="filters-row">
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="blocks-search" placeholder="Buscar bloque..." autocomplete="off"/>
+        </div>
+        <input type="text" class="filter-input" id="blocks-namespace" placeholder="Namespace (ej: minecraft)"/>
+        <input type="text" class="filter-input" id="blocks-mod_id" placeholder="Mod ID"/>
+        <input type="text" class="filter-input" id="blocks-tag" placeholder="Tag (ej: minecraft:mineable/pickaxe)"/>
+        <select id="blocks-waterloggable">
+          <option value="">Waterloggable: todos</option>
+          <option value="true">Sí</option>
+          <option value="false">No</option>
+        </select>
+        <div class="filter-range">
+          <label>Dureza mín</label>
+          <input type="number" id="blocks-hardness_min" placeholder="-1" min="-1" step="0.5" class="filter-input short"/>
+          <label>máx</label>
+          <input type="number" id="blocks-hardness_max" placeholder="-1" min="-1" step="0.5" class="filter-input short"/>
+        </div>
+        <div class="filter-range">
+          <label>Luz mín</label>
+          <input type="number" id="blocks-light_min" placeholder="-1" min="-1" max="15" class="filter-input short"/>
+          <label>máx</label>
+          <input type="number" id="blocks-light_max" placeholder="-1" min="-1" max="15" class="filter-input short"/>
+        </div>
+        <div class="view-toggle">
+          <button id="btnGridB" class="view-btn active" title="Cuadrícula">⊞</button>
+          <button id="btnListB" class="view-btn" title="Lista">☰</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RECIPES FILTERS -->
+    <div class="filters-panel" id="filters-recipes" style="display:none">
+      <div class="filters-row">
+        <input type="text" class="filter-input" id="recipes-item_id" placeholder="Item resultado (ej: minecraft:iron_ingot)"/>
+        <input type="text" class="filter-input" id="recipes-ingredient_id" placeholder="Ingrediente (ej: minecraft:iron_ore)"/>
+        <input type="text" class="filter-input" id="recipes-recipe_type" placeholder="Tipo (ej: minecraft:crafting_shaped)"/>
+        <input type="text" class="filter-input" id="recipes-namespace" placeholder="Namespace"/>
+        <button class="apply-btn" onclick="applyRecipeFilters()">Buscar ↗</button>
+      </div>
+    </div>
+
+    <!-- PANELS -->
+    <section class="panel active" id="panel-items">
+      <div class="loading-screen" id="loadingItems">
+        <div class="pixel-loader"></div>
+        <p>Cargando items...</p>
+      </div>
+      <div class="card-grid" id="itemsGrid"></div>
+      <div class="pagination" id="itemsPagination"></div>
+    </section>
+
+    <section class="panel" id="panel-blocks">
+      <div class="loading-screen" id="loadingBlocks">
+        <div class="pixel-loader"></div>
+        <p>Cargando bloques...</p>
+      </div>
+      <div class="card-grid" id="blocksGrid"></div>
+      <div class="pagination" id="blocksPagination"></div>
+    </section>
+
+    <section class="panel" id="panel-recipes">
+      <div class="loading-screen" id="loadingRecipes">
+        <div class="pixel-loader"></div>
+        <p>Cargando recetas...</p>
+      </div>
+      <div class="recipes-grid" id="recipesGrid"></div>
+      <div class="pagination" id="recipesPagination"></div>
+    </section>
+
+  </main>
+
+  <!-- MODAL -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal-box">
+      <button class="modal-close" id="modalClose">✕</button>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
